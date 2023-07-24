@@ -1,6 +1,5 @@
 <?php
-namespace AngelBroking; 
-session_start();
+namespace AngelapiPhp\AngelBroking;
 require_once("includes/AngelConfigrationManage.php");	
 
 
@@ -22,7 +21,7 @@ class SmartApi
 			
 	}
 
-	public static function GenerateSession($clientcode, $password)
+	public static function GenerateSession($clientcode, $password, $totp)
 	{
 		//get url from config file
 		$UrlData = AngelConfigrationManage::AngelConfigrationData();
@@ -31,7 +30,7 @@ class SmartApi
 
 	  	//Generate session;
 	  	
-	  	$api_parameter = ['clientcode'=>$clientcode,'password'=>$password];
+	  	$api_parameter = ['clientcode'=>$clientcode,'password'=>$password,'totp'=>$totp];
 
 
 	  	// Common function to call smart api	
@@ -41,11 +40,14 @@ class SmartApi
 		$res = json_decode($response_data,true);		
 		$jwtToken = $res['response_data']['data']['jwtToken'];
 		$refreshToken = $res['response_data']['data']['refreshToken'];
+		$feedToken = $res['response_data']['data']['feedToken'];
 
 		$_SESSION['jwtToken']		=	$jwtToken;
 		$_SESSION['refreshToken']	=   $refreshToken;
+		$_SESSION['feedToken']	=   $feedToken;
 		setcookie('jwtToken', $jwtToken);
 		setcookie('refreshToken', $refreshToken);		
+		setcookie('feedToken', $feedToken);		
 		
 		return $response_data;
 	}
