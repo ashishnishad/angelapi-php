@@ -1,7 +1,7 @@
 <?php
 namespace AngelapiPhp\AngelBroking;
-require_once("includes/AngelConfigrationManage.php");	
-
+use AngelapiPhp\AngelBroking\Includes\AngelConfigrationManage;
+use Illuminate\Http\Request;
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -9,16 +9,21 @@ error_reporting(E_ALL);
 
 class SmartApi
 {
-	
+	public static $sessionID = '';
 	public function __construct($jwtToken='', $refreshToken='')
 	{
+		$sessionID = self::$sessionID;
 		if (!empty($jwtToken) || !empty($refreshToken)) {
-			$_SESSION['jwtToken']		=	$jwtToken;
-			$_SESSION['refreshToken']	=   $refreshToken;
+			$_SESSION[$sessionID]['jwtToken']		=	$jwtToken;
+			$_SESSION[$sessionID]['refreshToken']	=   $refreshToken;
 			setcookie('jwtToken', $jwtToken);
 			setcookie('refreshToken', $refreshToken);
 		}
 			
+	}
+	
+	public function setSessionId($sessionID){
+		self::$sessionID = $sessionID;
 	}
 
 	public static function GenerateSession($clientcode, $password, $totp)
@@ -31,20 +36,20 @@ class SmartApi
 	  	//Generate session;
 	  	
 	  	$api_parameter = ['clientcode'=>$clientcode,'password'=>$password,'totp'=>$totp];
-
-
+		$sessionID = self::$sessionID;
+		//	print_r($sessionID); die; 
 	  	// Common function to call smart api	
 		$response_data	=	self::CurlOperation($url, $api_parameter,'','POST');
 
 		//save $jwtToken and refreshToken in session
 		$res = json_decode($response_data,true);		
-		$jwtToken = $res['response_data']['data']['jwtToken'];
-		$refreshToken = $res['response_data']['data']['refreshToken'];
-		$feedToken = $res['response_data']['data']['feedToken'];
+		$jwtToken = $res['response_data']['data']['jwtToken'] ?? '';
+		$refreshToken = $res['response_data']['data']['refreshToken'] ?? '';
+		$feedToken = $res['response_data']['data']['feedToken'] ?? '';
 
-		$_SESSION['jwtToken']		=	$jwtToken;
-		$_SESSION['refreshToken']	=   $refreshToken;
-		$_SESSION['feedToken']	=   $feedToken;
+		$_SESSION[$sessionID]['jwtToken']		=	$jwtToken;
+		$_SESSION[$sessionID]['refreshToken']	=   $refreshToken;
+		$_SESSION[$sessionID]['feedToken']	=   $feedToken;
 		setcookie('jwtToken', $jwtToken);
 		setcookie('refreshToken', $refreshToken);		
 		setcookie('feedToken', $feedToken);		
@@ -54,8 +59,6 @@ class SmartApi
 
 	public static function GenerateToken()
 	{
-
-		
 		$token = self::getToken();
 				
 		 if ($token['status']) {
@@ -628,18 +631,19 @@ class SmartApi
 
 	public static function getToken()
 	{
+		$sessionID = self::$sessionID;
 		$jwtToken = '';
 		$refreshToken = '';
 
-		if (isset($_SESSION['jwtToken']) && !empty($_SESSION['jwtToken'])) {
-			$jwtToken	=	$_SESSION['jwtToken'];
+		if (isset($_SESSION[$sessionID]['jwtToken']) && !empty($_SESSION[$sessionID]['jwtToken'])) {
+			$jwtToken	=	$_SESSION[$sessionID]['jwtToken'];
 		}
 		else if (isset($_COOKIE['jwtToken']) && !empty($_COOKIE['jwtToken'])) {
 			$jwtToken	=	$_COOKIE['jwtToken'];
 		}
 
-		if (isset($_SESSION['refreshToken']) && !empty($_SESSION['refreshToken'])) {
-			$refreshToken	=	$_SESSION['refreshToken'];
+		if (isset($_SESSION[$sessionID]['refreshToken']) && !empty($_SESSION[$sessionID]['refreshToken'])) {
+			$refreshToken	=	$_SESSION[$sessionID]['refreshToken'];
 		}
 		else if (isset($_COOKIE['refreshToken']) && !empty($_COOKIE['refreshToken'])) {
 			$refreshToken	=	$_COOKIE['refreshToken'];
