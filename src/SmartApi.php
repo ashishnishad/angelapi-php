@@ -11,6 +11,7 @@ error_reporting(E_ALL);
 class SmartApi
 {
 	public static $sessionID = '';
+	
 	public function __construct($jwtToken='', $refreshToken='')
 	{
 		$sessionID = self::$sessionID;
