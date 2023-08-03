@@ -1,4 +1,5 @@
 <?php
+
 namespace AngelapiPhp\AngelBroking;
 use AngelapiPhp\AngelBroking\Includes\AngelConfigrationManage;
 use Illuminate\Http\Request;
